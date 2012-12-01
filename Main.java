@@ -13,9 +13,9 @@ public class Main extends Activity {
 	//class constants that will signify to the game class which game type was chosen, pvp player vs comp
 	public static final int PVP = 0;
 	public static final int PVC = 1;
+	public static final int RESUME = 2;
 	
-	private Button btnPlayer;
-	private Button btnComp;
+	private Button btnPlayer, btnComp, btnResume;
 	private Intent intent;
 	private Bundle out;
 	
@@ -31,9 +31,11 @@ public class Main extends Activity {
 	    
 	    btnPlayer = (Button)findViewById(R.id.btnPlayer);
         btnComp = (Button)findViewById(R.id.btnComp);
+        btnResume = (Button)findViewById(R.id.btnResume);
         
         btnPlayer.setOnClickListener(listener);
         btnComp.setOnClickListener(listener);
+        btnResume.setOnClickListener(listener);
         
 	}
 	//----------------------------------------------------EVENT LISTENERS
@@ -49,13 +51,14 @@ public class Main extends Activity {
 	//----------------------------------------------------EVENT HANDLERS
 	
 	private void onBtnClick(View v){
-		
 		//if the player button is picked then the player constant is sent to the game class
 		//vice versa if other button is clicked
 		if(btnPlayer.getId() == v.getId()){
-			out.putInt("number", PVP);
+			out.putInt("gameType", PVP);
 		}else if(btnComp.getId() == v.getId()){
-			out.putInt("number", PVC);
+			out.putInt("gameType", PVC);
+		}else if(btnResume.getId() == v.getId()){
+			out.putInt("gameType", RESUME);
 		}
 		//put the bundle in the intent and start the activity with the intent
 		intent.putExtras(out);
