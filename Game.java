@@ -1,11 +1,16 @@
 package com.nathan;
 
+import java.util.Arrays;
+
 import android.os.Bundle;
+import android.os.Handler;
 import android.util.Log;
 import android.view.View;
 import android.view.View.OnClickListener;
 import android.widget.ImageButton;
 import android.app.Activity;
+import android.app.AlertDialog;
+import android.content.DialogInterface;
 import android.graphics.drawable.Drawable;
 
 
@@ -14,6 +19,8 @@ public class Game extends Activity {
 	private ImageButton[][] imgBoard;
 	private int gameType;
 	private Board board;
+	private AlertDialog.Builder aBuilder;
+	private Handler handler;
 	
 	
 	
@@ -26,7 +33,12 @@ public class Game extends Activity {
         //instantiate image button array
         
         imgBoard = new ImageButton[3][3];
-        board = new Board();
+        
+        aBuilder =  new AlertDialog.Builder(this);
+        
+        aBuilder.setTitle("Game Over");
+        handler = new Handler();
+        
         
 //        for(int r = 0; r <=2; r++){ 
 //        	for(int c = 0; c <=2; c++){
@@ -44,6 +56,16 @@ public class Game extends Activity {
         imgBoard[2][0] = (ImageButton)findViewById(R.id.btnImg6);
         imgBoard[2][1] = (ImageButton)findViewById(R.id.btnImg7);
         imgBoard[2][2] = (ImageButton)findViewById(R.id.btnImg8);
+        
+        if (savedInstanceState != null) {
+        	
+        	board = (Board) savedInstanceState.getSerializable("board");
+        	rePopImages(board.getBoard());
+        	
+        }else{
+        	board = new Board();
+        	
+        }
         
         //set the event listener for each image button
 	    for(int r = 0; r <=2; r++){ 
@@ -65,6 +87,11 @@ public class Game extends Activity {
         Log.d("Nathan","");
         
         // TODO you may have to call onDestroy and onStop to make sure the state is always saved
+        
+    }
+	//----------------------------------------------------PUBLIC 
+	public void onSaveInstanceState(Bundle outState){
+    	outState.putSerializable("board",board);
     }
 	
 	
@@ -77,6 +104,26 @@ public class Game extends Activity {
 	private void newGame(){
 		board.resetBoard(gameType);
 	}
+	
+	private void clearImages(){
+		for(int r = 0; r <=2; r++){ 
+        	for(int c = 0; c <=2; c++){
+        		imgBoard[r][c].setImageResource(0);
+            }
+        }
+	}
+	private void rePopImages(int[][] myBoard){
+		for(int r = 0; r <=2; r++){ 
+        	for(int c = 0; c <=2; c++){
+        		if(myBoard[r][c] == Board.EX){
+        			imgBoard[r][c].setImageResource(R.drawable.ex);
+        		}else if(myBoard[r][c] == Board.OH){
+        			imgBoard[r][c].setImageResource(R.drawable.oh);
+        		}
+        		
+            }
+        }
+	}
 //----------------------------------------------------EVENT LISTENERS
 	
 	//on button click event listener
@@ -86,6 +133,23 @@ public class Game extends Activity {
 			onBtnClick(v);
 		}
 	};
+	private DialogInterface.OnClickListener aListener = new DialogInterface.OnClickListener(){
+
+		@Override
+		public void onClick(DialogInterface dialog, int whichBtn) {
+			if(whichBtn == -1){
+				board.resetBoard(gameType);
+				clearImages();
+				
+			}else{
+				finish();
+			}
+			
+		}
+		
+		
+	};
+
 	
 	//----------------------------------------------------EVENT HANDLERS
 	//this may clean things up a bit..
@@ -103,7 +167,9 @@ public class Game extends Activity {
 	private void onBtnClick(final View v){
 		//separate thread to keep the ui from locking up
 		
-		
+//		aBuilder.setPositiveButton("OK",aListener);
+//    	// make it show the dialog window
+//		aBuilder.show();
 		
 		
 		Thread thread = new Thread(new Runnable(){
@@ -123,20 +189,52 @@ public class Game extends Activity {
 			        			//afraid they will change during the run under the post
 			        			final int x = r;
 			        			final int y = c;
+			        			final int z = board.getTurn(); //rename this var?
 			        			
 			        			imgBoard[x][y].post(new Runnable(){
 			        				public void run(){
-			        					if(board.ticTacToe() == 0){
+			        					if(z == 0){
 			        						imgBoard[x][y].setImageResource(R.drawable.ex);
 			        					}else{
 			        						imgBoard[x][y].setImageResource(R.drawable.oh);
+			        						
 			        					}
 			        				}
 			        			});
 			        			
-			        			//imgBoard[r][c].setBackgroundResource(R.drawable.ex);
-			        			//imgBoard[r][c].setImageResource(R.drawable.oh);
+			        			
+			        			
+			        			if(board.getTurn() == 0){
+	        						board.setBoard(x,y,Board.EX);
+	        					}else{
+	        						board.setBoard(x,y,Board.OH);
+	        					}
+			        			aBuilder.setMessage(board.ticTacToe());
+			        			
+			        			
+			        			handler.post(new Runnable(){
+
+									@Override
+									public void run() {
+										// TODO popup wont show during tie
+										if(board.isWin() == true){
+											
+											aBuilder.setNegativeButton("No",aListener);
+											aBuilder.setPositiveButton("Ok",aListener);
+											aBuilder.show();
+										}
+									}
+			        				
+			        			});
+			        			
+			        			
+			        			
+			        			
 			        		}
+			        		
+//			        		if(board.isWin()==true){
+//			        			imgBoard[r][c].setEnabled(false);
+//			        		}
 			            }	
 			        }
 					
@@ -147,6 +245,9 @@ public class Game extends Activity {
 			}
 		});
 		thread.start();
+		
+		
+		Log.d("Nathan",Boolean.toString(board.isWin()));
 		
 		
 		
