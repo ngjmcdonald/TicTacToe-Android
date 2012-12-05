@@ -17,16 +17,19 @@ public class Board implements Serializable {
 	
 	private int turn, touchCount;
 	private int[][] board;
-	private boolean isWin;
+	private boolean isGameOver;
+	private boolean isP1Win;
+	private boolean isP2Win;
+	private boolean isTie;
 	private String strRow,strCol,strDiag1,strDiag2;
 	private String winMessage;
 	private String[] aryCol,aryRow;
+	private boolean isVsComp;
 	
 	
 	//-------------------------------------------------CONSTRUCTOR
 	public Board(){
 		board = new int[3][3];
-		isWin = false;
 		resetBoard(0);
 		
 		aryRow = new String[3];
@@ -49,8 +52,20 @@ public class Board implements Serializable {
 	public void setBoard(int posR,int posY, int val) {
 		board[posR][posY] = val;
 	}
-	public boolean isWin() {
-		return isWin;
+	public boolean isGameOver() {
+		return isGameOver;
+	}
+	public int getTouchCount(){
+		return touchCount;
+	}
+	public boolean isP1Win(){
+		return isP1Win;
+	}
+	public boolean isP2Win(){
+		return isP2Win;
+	}
+	public boolean isTie(){
+		return isTie;
 	}
 	
 	
@@ -60,6 +75,9 @@ public class Board implements Serializable {
 	// method to reset the game, maybe call it newGame()? 
 	//but that sounds like it should be in the game class..
 	public void resetBoard(int myGameType){
+		isGameOver = false;
+		isP1Win = false;
+		isP2Win = false;
 	   touchCount = 0;
 	   turn= 0;
 	   winMessage = "";
@@ -71,13 +89,14 @@ public class Board implements Serializable {
 		
 		//check the game type
 		if(myGameType == Main.PVP){
-			Log.d("Nathan","Game type is PVP");
+			isVsComp = false;
 		}else if(myGameType == Main.PVC){
-			Log.d("Nathan","Game type is PVC");
+			isVsComp = true;
 		}
 	}
 	
 	public String ticTacToe(){
+		
 		touchCount++;
 		//game has to toggle the turn by itself
 		if(turn == 1){
@@ -88,6 +107,20 @@ public class Board implements Serializable {
 		
 		
 		
+		
+		String foo = "";
+		  int b = 0;
+		  
+		  for(int r = 0; r <=2; r++){ 
+		  	for(int c = 0; c <=2; c++){
+		  		if(b % 3 == 0){
+		  			foo += "\n";
+		  		}
+		  		foo += Integer.toString(board[r][c]);
+		  		b++;
+		  		}
+		  }
+		  Log.d("Nathan", foo + "-----");
 		
 		
 		checkWin();
@@ -104,7 +137,10 @@ public class Board implements Serializable {
 	//-------------------------------------------------PRIVATE METHODS
 	
 	private boolean checkWin(){
-		isWin = false;
+		isGameOver = false;
+		isP1Win = false;
+		isP2Win = false;
+		isTie = false;
 		
 		// TODO the winning message has to change depending on if it is the AI
 		// that is playing or another player (Player Two Wins!) for eample
@@ -146,21 +182,27 @@ public class Board implements Serializable {
     						|| (strDiag1.equals("111")) || strDiag2.equals("111")){
     					
     					winMessage = "X wins! Play  again?";
-    					isWin = true;
+    					isP1Win = true;
+    					isGameOver = true;
     					break;
     					
     				}else if((aryRow[r].equals("222")) || (aryCol[c].equals("222")) 
     						|| (strDiag1.equals("222")) || strDiag2.equals("222")){
     					
     					winMessage = "O wins! Play again?";
-    					isWin = true;
+    					isP2Win = true;
+    					isGameOver = true;
+    					
     					break;
     					
     				}
     			}	
-    				if(touchCount == 9){
+    				if((touchCount == 9) && (!isGameOver)){
+    					
     					winMessage = "Tie! Play again?";
-    					isWin = true;
+    					isTie = true;
+    					isGameOver = true;
+    					break;
     				}
     				
     			counter++;
@@ -168,7 +210,7 @@ public class Board implements Serializable {
     		
     		
     	}
-		return isWin;
+		return isGameOver;
 	}
 	
 }
