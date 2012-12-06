@@ -28,6 +28,9 @@ public class Game extends Activity {
 	private Handler handler;
 	private File file;
 	private Button btnBack;
+	private Button btnNew;
+	private TextView txtOutput;
+	private String output;
 	
 	
 	
@@ -39,7 +42,7 @@ public class Game extends Activity {
         file = new File(SAVE_FILE);
         file = getFileStreamPath(SAVE_FILE);
         //instantiate image button array
-        
+        output = "";
         imgBoard = new ImageButton[3][3];
         comp = new Computer();
         aBuilder =  new AlertDialog.Builder(this);
@@ -61,12 +64,23 @@ public class Game extends Activity {
         imgBoard[2][1] = (ImageButton)findViewById(R.id.btnImg7);
         imgBoard[2][2] = (ImageButton)findViewById(R.id.btnImg8);
         btnBack = (Button) findViewById(R.id.btnBack);
-        
+        btnNew = (Button) findViewById(R.id.btnNew);
+        txtOutput = (TextView) findViewById(R.id.txtOutput);
+        // TODO gameType is not saving on a certain condition, some combination of resume and orientation change,
+        //now saves only for PVC
         if (savedInstanceState != null) {
         	
         	board = (Board) savedInstanceState.getSerializable("board");
+        	if(board.isGameOver()){
+        		imgsSetEnabled(false);
+        		btnNew.setEnabled(true);
+        	}else{
+        		btnNew.setEnabled(false);
+        	}
         	rePopImages(board.getBoard());
+        	
         	gameType = savedInstanceState.getInt("gameType");
+        	
         	
         }else{
         	if(file.exists()){
@@ -82,6 +96,7 @@ public class Game extends Activity {
         }
         
         btnBack.setOnClickListener(listener);
+        btnNew.setOnClickListener(listener);
         
         //set the event listener for each image button
 	    for(int r = 0; r <=2; r++){ 
@@ -105,11 +120,22 @@ public class Game extends Activity {
         	board.resetBoard(gameType);
         	imgsSetEnabled(true);
         	clearImages();
+        	btnNew.setEnabled(false);
+        	
         }else if(gameType == Main.RESUME){ //ADDED ELSE IF, MAY BREAK SOMETHING!
         	rePopImages(board.getBoard());
-        	gameType = gameTypeSaved;
+
+        	if(savedInstanceState == null){
+        		gameType = gameTypeSaved;
+        	}else{
+        		gameType = savedInstanceState.getInt("gameType");
+        	}
+
         	if(board.isGameOver()){
         		imgsSetEnabled(false);
+        		btnNew.setEnabled(true);
+        	}else{
+        		btnNew.setEnabled(false);
         	}
         	
         }
@@ -196,9 +222,7 @@ public class Game extends Activity {
 		@Override
 		public void onClick(DialogInterface dialog, int whichBtn) {
 			if(whichBtn == -1){
-				board.resetBoard(gameType);
-				clearImages();
-				imgsSetEnabled(true);
+				
 				
 			}else{
 				finish();
@@ -271,11 +295,14 @@ public class Game extends Activity {
 			@Override
 			public void run(){
 				try{
+					boolean newG = false;
 					if(btnBack.getId() == v.getId()){
 						finish();
+					}else if(btnNew.getId() == v.getId()){ // TODO -------
+						newG = true;
 					}
 					
-					
+					final boolean newGame = newG;
 					
 					// loop through image buttons on each click, checking to see which one was clicked and assigning an image to it
 					for(int r = 0; r <=2; r++){ 
@@ -295,7 +322,7 @@ public class Game extends Activity {
 	        						board.setBoard(x,y,Board.EX);
 	        						Log.d("Nathan","GAMETYPE CLICK"+gameType);
 	        						if(gameType != Main.PVP){
-	        							aBuilder.setMessage(board.ticTacToe());
+	        							output = board.ticTacToe();
 	        							
 	        							if(!board.isTie() && !board.isP1Win()){
 	        								// TODO CHECK IF YOU WIN BEFORE COMP TAKES TURN
@@ -304,7 +331,7 @@ public class Game extends Activity {
 		        							
 		        							board.setBoard(blah[0],blah[1],Board.OH);
 		        							//board.setTurn(0);
-		        							aBuilder.setMessage(board.ticTacToe());
+		        							output = board.ticTacToe();
 	        							}
 	        							
 	        							
@@ -318,7 +345,7 @@ public class Game extends Activity {
 	        						
 	        					}
 			        			if(gameType != Main.PVC){
-			        				aBuilder.setMessage(board.ticTacToe());
+			        				output = board.ticTacToe();
 			        			}
 			        			
 			        			final int compX = blah[0];
@@ -373,8 +400,23 @@ public class Game extends Activity {
 						public void run() {
 							
 							if(board.isGameOver() == true){
-			        			aBuilder.show();
-			        			imgsSetEnabled(false);
+								btnNew.setEnabled(true);
+								if(newGame){
+									board.resetBoard(gameType);
+									clearImages();
+									imgsSetEnabled(true);
+									btnNew.setEnabled(false);
+									txtOutput.setText("");
+								}else{
+									
+									imgsSetEnabled(false);
+									txtOutput.setText(output);
+								}
+			        			
+			        			
+			        			
+							}else{
+								btnNew.setEnabled(false);
 							}
 						}
         				
