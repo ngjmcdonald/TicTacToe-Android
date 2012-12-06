@@ -3,6 +3,7 @@ package com.nathan;
 import java.io.Serializable;
 import java.util.Arrays;
 
+import android.content.Context;
 import android.util.Log;
 
 public class Board implements Serializable {
@@ -24,16 +25,17 @@ public class Board implements Serializable {
 	private String strRow,strCol,strDiag1,strDiag2;
 	private String winMessage;
 	private String[] aryCol,aryRow;
-	private boolean isVsComp;
+	private  static Context context;
 	
 	
 	//-------------------------------------------------CONSTRUCTOR
-	public Board(){
+	public Board(Context con){
 		board = new int[3][3];
 		resetBoard(0);
 		
 		aryRow = new String[3];
 		aryCol = new String[3];
+		context = con;
 		
 		
 		
@@ -87,12 +89,6 @@ public class Board implements Serializable {
     	 }
      }
 		
-		//check the game type
-		if(myGameType == Main.PVP){
-			isVsComp = false;
-		}else if(myGameType == Main.PVC){
-			isVsComp = true;
-		}
 	}
 	
 	public String ticTacToe(){
@@ -181,7 +177,8 @@ public class Board implements Serializable {
     				if((aryRow[r].equals("111")) || (aryCol[c].equals("111")) 
     						|| (strDiag1.equals("111")) || strDiag2.equals("111")){
     					
-    					winMessage = "X wins! Play  again?";
+    					winMessage = context.getResources().getString(R.string.xWins);
+//    					winMessage = "X wins! Play  again?";
     					isP1Win = true;
     					isGameOver = true;
     					break;
@@ -189,7 +186,8 @@ public class Board implements Serializable {
     				}else if((aryRow[r].equals("222")) || (aryCol[c].equals("222")) 
     						|| (strDiag1.equals("222")) || strDiag2.equals("222")){
     					
-    					winMessage = "O wins! Play again?";
+    					winMessage = context.getResources().getString(R.string.oWins);
+//    					winMessage = "O wins! Play again?";
     					isP2Win = true;
     					isGameOver = true;
     					
@@ -199,7 +197,8 @@ public class Board implements Serializable {
     			}	
     				if((touchCount == 9) && (!isGameOver)){
     					
-    					winMessage = "Tie! Play again?";
+    					winMessage = context.getResources().getString(R.string.gameTie);
+//    					winMessage = "Tie! Play again?";
     					isTie = true;
     					isGameOver = true;
     					break;
@@ -214,18 +213,3 @@ public class Board implements Serializable {
 	}
 	
 }
-//loops to see what the numbers are in the console
-
-//String foo = "";
-//int b = 0;
-//
-//for(int r = 0; r <=2; r++){ 
-//	for(int c = 0; c <=2; c++){
-//		if(b % 3 == 0){
-//			foo += "\n";
-//		}
-//		foo += Integer.toString(board[r][c]);
-//		b++;
-//		}
-//}
-//Log.d("Nathan", foo + "-----");

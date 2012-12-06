@@ -7,13 +7,12 @@ import java.util.Arrays;
 import android.os.Bundle;
 import android.os.Handler;
 import android.util.Log;
-import android.view.View;
+import android.view.*;
 import android.view.View.OnClickListener;
-import android.widget.ImageButton;
+import android.widget.*;
 import android.app.Activity;
 import android.app.AlertDialog;
 import android.content.DialogInterface;
-import android.graphics.drawable.Drawable;
 
 
 public class Game extends Activity {
@@ -28,6 +27,7 @@ public class Game extends Activity {
 	private AlertDialog.Builder aBuilder;
 	private Handler handler;
 	private File file;
+	private Button btnBack;
 	
 	
 	
@@ -60,24 +60,28 @@ public class Game extends Activity {
         imgBoard[2][0] = (ImageButton)findViewById(R.id.btnImg6);
         imgBoard[2][1] = (ImageButton)findViewById(R.id.btnImg7);
         imgBoard[2][2] = (ImageButton)findViewById(R.id.btnImg8);
+        btnBack = (Button) findViewById(R.id.btnBack);
         
         if (savedInstanceState != null) {
         	
         	board = (Board) savedInstanceState.getSerializable("board");
         	rePopImages(board.getBoard());
-        	
+        	gameType = savedInstanceState.getInt("gameType");
         	
         }else{
         	if(file.exists()){
         		onLoad();
         		rePopImages(board.getBoard());
+        		
     		}else{
-    			board = new Board();
+    			board = new Board(this);
+    			
     		}
         	
         	
-        	
         }
+        
+        btnBack.setOnClickListener(listener);
         
         //set the event listener for each image button
 	    for(int r = 0; r <=2; r++){ 
@@ -101,17 +105,18 @@ public class Game extends Activity {
         	board.resetBoard(gameType);
         	imgsSetEnabled(true);
         	clearImages();
-        	Log.d("Nathan","asdas");
-        }else{
+        }else if(gameType == Main.RESUME){ //ADDED ELSE IF, MAY BREAK SOMETHING!
         	rePopImages(board.getBoard());
         	gameType = gameTypeSaved;
+        	if(board.isGameOver()){
+        		imgsSetEnabled(false);
+        	}
         	
         }
         
         
         
         
-        //Log.d("Nathan","Gametpye: " + gameType);
         
         // TODO need to test the game type with every on create,
         //it is called after the main menu button is pressed
@@ -119,7 +124,6 @@ public class Game extends Activity {
         // TODO BLANK LOG FOR TESTING---- DELETE
         Log.d("Nathan","");
         
-        // TODO you may have to call onDestroy and onStop to make sure the state is always saved
         
     }
 
@@ -127,17 +131,17 @@ public class Game extends Activity {
     public void onDestroy() {
         super.onDestroy();
         onSave();
-        Log.d("Nathan","ONDEST");
     }
     @Override
     public void onStop() {
-        super.onDestroy();
+        super.onDestroy(); //NOT THIS
+//        super.onStop();// TODO THIS 
         onSave();
-        Log.d("Nathan","ONSTOP");
     }
 	//----------------------------------------------------PUBLIC 
 	public void onSaveInstanceState(Bundle outState){
     	outState.putSerializable("board",board);
+    	outState.putInt("gameType", gameType);
     }
 	
 	
@@ -254,16 +258,7 @@ public class Game extends Activity {
         
         
     }
-	//this may clean things up a bit..
-	private Runnable runnable = new Runnable(){
 
-		@Override
-		public void run() {
-			
-			
-		}
-		
-	};
 	
 	
 	private void onBtnClick(final View v){
@@ -276,7 +271,9 @@ public class Game extends Activity {
 			@Override
 			public void run(){
 				try{
-					
+					if(btnBack.getId() == v.getId()){
+						finish();
+					}
 					
 					
 					
@@ -296,7 +293,7 @@ public class Game extends Activity {
 			        			
 			        			if(board.getTurn() == 0){
 	        						board.setBoard(x,y,Board.EX);
-	        						
+	        						Log.d("Nathan","GAMETYPE CLICK"+gameType);
 	        						if(gameType != Main.PVP){
 	        							aBuilder.setMessage(board.ticTacToe());
 	        							
@@ -362,12 +359,6 @@ public class Game extends Activity {
 			        					imgBoard[x][y].setEnabled(false);
 			        				}
 			        			});
-			        			
-			        			
-			        			
-			        			
-			        			
-			        			
 			        			
 			        			break;
 			        		}
