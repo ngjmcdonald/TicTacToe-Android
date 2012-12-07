@@ -14,7 +14,7 @@ public class Main extends Activity {
 	public static final int PVP = 0;
 	public static final int PVC = 1;
 	public static final int RESUME = 2;
-	
+	// variables to hold the buttons, intent and bundle
 	private Button btnPlayer, btnComp, btnResume;
 	private Intent intent;
 	private Bundle out;
@@ -24,15 +24,16 @@ public class Main extends Activity {
 	    super.onCreate(savedInstanceState);
 	    setContentView(R.layout.activity_main);
 	    //instantiate intent for game class
+	    // init the intent with the game activity 
 	    intent = new Intent("com.nathan.GAME");
 	    //instantiate  bundle for contants values 
 	    out = new Bundle();
 	    
-	    
+	    //init all the buttons
 	    btnPlayer = (Button)findViewById(R.id.btnPlayer);
         btnComp = (Button)findViewById(R.id.btnComp);
         btnResume = (Button)findViewById(R.id.btnResume);
-        
+        //assign all the buttons the event listener
         btnPlayer.setOnClickListener(listener);
         btnComp.setOnClickListener(listener);
         btnResume.setOnClickListener(listener);
@@ -49,8 +50,10 @@ public class Main extends Activity {
 	};
 	
 	//----------------------------------------------------EVENT HANDLERS
-	
+	// button click event handler
 	private void onBtnClick(View v){
+		//check the source of the event and assign the bundle the appropriate constant
+		
 		//if the player button is picked then the player constant is sent to the game class
 		//vice versa if other button is clicked
 		if(btnPlayer.getId() == v.getId()){
