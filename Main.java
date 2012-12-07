@@ -15,7 +15,7 @@ public class Main extends Activity {
 	public static final int PVC = 1;
 	public static final int RESUME = 2;
 	// variables to hold the buttons, intent and bundle
-	private Button btnPlayer, btnComp, btnResume;
+	private Button btnPlayer, btnComp, btnResume, btnQuit;
 	private Intent intent;
 	private Bundle out;
 	
@@ -33,11 +33,12 @@ public class Main extends Activity {
 	    btnPlayer = (Button)findViewById(R.id.btnPlayer);
         btnComp = (Button)findViewById(R.id.btnComp);
         btnResume = (Button)findViewById(R.id.btnResume);
+        btnQuit= (Button)findViewById(R.id.btnQuit);
         //assign all the buttons the event listener
         btnPlayer.setOnClickListener(listener);
         btnComp.setOnClickListener(listener);
         btnResume.setOnClickListener(listener);
-        
+        btnQuit.setOnClickListener(listener);
 	}
 	//----------------------------------------------------EVENT LISTENERS
 	
@@ -62,10 +63,16 @@ public class Main extends Activity {
 			out.putInt("gameType", PVC);
 		}else if(btnResume.getId() == v.getId()){
 			out.putInt("gameType", RESUME);
+		}else if(btnQuit.getId() == v.getId()){
+			finish();
 		}
+		
 		//put the bundle in the intent and start the activity with the intent
-		intent.putExtras(out);
-		startActivity(intent);
+		if(btnQuit.getId() != v.getId()){
+			intent.putExtras(out);
+			startActivity(intent);
+		}
+	
 		
 	}
   
